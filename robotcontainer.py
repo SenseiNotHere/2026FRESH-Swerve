@@ -15,6 +15,7 @@ from wpimath.trajectory import TrajectoryConfig, TrajectoryGenerator
 
 from constants import AutoConstants, DriveConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem, BadSimPhysics
+from subsystems.limelight_camera import LimelightCamera
 
 from commands.reset_xy import ResetXY, ResetSwerveFront
 
@@ -31,6 +32,7 @@ class RobotContainer:
         self.robotDrive = DriveSubsystem()
         if commands2.TimedCommandRobot.isSimulation():
             self.robotDrive.simPhysics = BadSimPhysics(self.robotDrive, robot)
+        self.limelight =  LimelightCamera("limelight")
 
         # The driver's controller
         self.driverController = CommandGenericHID(OIConstants.kDriverControllerPort)

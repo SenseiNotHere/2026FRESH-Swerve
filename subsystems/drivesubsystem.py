@@ -17,8 +17,7 @@ from wpilib import SmartDashboard, Field2d
 
 from constants import DriveConstants, ModuleConstants
 import swerveutils
-from .maxswervemodule import MAXSwerveModule
-from rev import SparkMax, SparkFlex
+from .phoenixswervemodule import PhoenixSwerveModule
 import navx
 
 
@@ -33,36 +32,32 @@ class DriveSubsystem(Subsystem):
         enabledChassisAngularOffset = 0 if DriveConstants.kAssumeZeroOffsets else 1
 
         # Create MAXSwerveModules
-        self.frontLeft = MAXSwerveModule(
+        self.frontLeft = PhoenixSwerveModule(
             DriveConstants.kFrontLeftDrivingCanId,
             DriveConstants.kFrontLeftTurningCanId,
             DriveConstants.kFrontLeftChassisAngularOffset * enabledChassisAngularOffset,
-            turnMotorInverted=ModuleConstants.kTurningMotorInverted,
-            motorControllerType=SparkFlex,
+            turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.frontRight = MAXSwerveModule(
+        self.frontRight = PhoenixSwerveModule(
             DriveConstants.kFrontRightDrivingCanId,
             DriveConstants.kFrontRightTurningCanId,
             DriveConstants.kFrontRightChassisAngularOffset * enabledChassisAngularOffset,
-            turnMotorInverted=ModuleConstants.kTurningMotorInverted,
-            motorControllerType=SparkFlex,
+            turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.rearLeft = MAXSwerveModule(
+        self.rearLeft = PhoenixSwerveModule(
             DriveConstants.kRearLeftDrivingCanId,
             DriveConstants.kRearLeftTurningCanId,
             DriveConstants.kBackLeftChassisAngularOffset * enabledChassisAngularOffset,
-            turnMotorInverted=ModuleConstants.kTurningMotorInverted,
-            motorControllerType=SparkFlex,
+            turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.rearRight = MAXSwerveModule(
+        self.rearRight = PhoenixSwerveModule(
             DriveConstants.kRearRightDrivingCanId,
             DriveConstants.kRearRightTurningCanId,
             DriveConstants.kBackRightChassisAngularOffset * enabledChassisAngularOffset,
-            turnMotorInverted=ModuleConstants.kTurningMotorInverted,
-            motorControllerType=SparkFlex,
+            turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
         # The gyro sensor
