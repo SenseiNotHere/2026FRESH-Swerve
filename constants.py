@@ -18,6 +18,8 @@ from wpimath.trajectory import TrapezoidProfileRadians
 
 from rev import SparkBase, SparkBaseConfig, ClosedLoopConfig
 
+from pathplannerlib.config import RobotConfig, ModuleConfig, DCMotor
+
 
 class NeoMotorConstants:
     kFreeSpeedRpm = 5676
@@ -163,20 +165,26 @@ class OIConstants:
     kDriveDeadband = 0.05
 
 
-class AutoConstants:
-    kUseSqrtControl = True  # improves arrival time and precision for simple driving commands
+class autoConstants:
+        # Create a ModuleConfig with KrakenX60 motor
+        module_config = ModuleConfig(
+            maxDriveVelocityMPS=DriveConstants.kMaxSpeedMetersPerSecond,
+            driveMotor=DCMotor.krakenX60(),  # Try accessing it directly from DCMotor
+            driveCurrentLimit=ModuleConstants.kDrivingMotorCurrentLimit,
+            numMotors=1,
+            wheelRadiusMeters=ModuleConstants.kWheelDiameterMeters/2,
+            wheelCOF=1.0
+        )
 
-    # below are really trajectory constants
-    kMaxSpeedMetersPerSecond = 3
-    kMaxAccelerationMetersPerSecondSquared = 3
-    kMaxAngularSpeedRadiansPerSecond = math.pi
-    kMaxAngularSpeedRadiansPerSecondSquared = math.pi
+        # Now create the RobotConfig with the ModuleConfig
+        config = RobotConfig(
+            massKG=60.0,
+            MOI=8.0,
+            moduleConfig=module_config,
+            moduleOffsets=DriveConstants.kModulePositions  # Add module positions
+        )
 
-    kPXController = 1
-    kPYController = 1
-    kPThetaController = 1
-
-    # Constraint for the motion profiled robot angle controller
-    kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
-        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared
-    )
+        # Set additional properties after construction
+        config.maxModuleSpeed = DriveConstants.kMaxSpeedMetersPerSecond
+        config.driveBaseRadius = 0.45  # meters
+        config.maxCentripetalAcceleration = 3.0  # m/s²

@@ -12,14 +12,18 @@ from wpimath.kinematics import (
     SwerveDrive4Kinematics,
     SwerveDrive4Odometry,
 )
-from wpilib import SmartDashboard, Field2d
+from wpilib import SmartDashboard, Field2d, DriverStation
 
-
-from constants import DriveConstants, ModuleConstants
 import swerveutils
 from .phoenixswervemodule import PhoenixSwerveModule
 import navx
 
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.config import RobotConfig, PIDConstants
+
+from constants import DriveConstants, ModuleConstants, autoConstants
+from commands.holonomicdrive import HolonomicDrive
 
 class DriveSubsystem(Subsystem):
     def __init__(self, maxSpeedScaleFactor=None) -> None:
@@ -93,6 +97,37 @@ class DriveSubsystem(Subsystem):
 
         self.simPhysics = None
 
+        AutoBuilder.configure(
+            self.getPose,  # Robot pose supplier
+            self.resetOdometry,  # Method to reset odometry (will be called if your auto has a starting pose)
+            self.getRobotRelativeSpeeds,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            lambda speeds, feedforwards: self.drive(speeds.vx, speeds.vy, speeds.omega, True, True),            # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
+            PPHolonomicDriveController(
+                # PPHolonomicController is the built in path following controller for holonomic drive trains
+                PIDConstants(5.0, 0.0, 0.0),  # Translation PID constants
+                PIDConstants(5.0, 0.0, 0.0)  # Rotation PID constants
+            ),
+            autoConstants.config,  # The robot configuration
+            self.shouldFlipPath,  # Supplier to control path flipping based on alliance color
+            self  # Reference to this subsystem to set requirements
+        )
+
+    def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
+        """Returns the current robot-relative ChassisSpeeds"""
+        return DriveConstants.kDriveKinematics.toChassisSpeeds(
+            (
+                self.frontLeft.getState(),
+                self.frontRight.getState(),
+                self.rearLeft.getState(),
+                self.rearRight.getState(),
+            )
+        )
+
+    def shouldFlipPath(self):
+        # Boolean supplier that controls when the path will be mirrored for the red alliance
+        # This will flip the path being followed to the red side of the field.
+        # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        return DriverStation.getAlliance() == DriverStation.Alliance.kRed
 
     def periodic(self) -> None:
         if self.simPhysics is not None:

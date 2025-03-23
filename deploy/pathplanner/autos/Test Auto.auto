@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start to Reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef to Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Station to Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score to Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Station to Score"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
