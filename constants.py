@@ -71,6 +71,12 @@ class DriveConstants:
 
     kGyroReversed = -1  # can be +1 if not flipped (affects field-relative driving)
 
+class LiftConstants:
+    #Elevator CAN IDs
+    kLiftLeadCanId = 9
+    kLeadMotorInverted = False
+    kLiftFollowCanId = 10
+    kFollowMotorInverted = True
 
 def getSwerveDrivingMotorConfig() -> SparkBaseConfig:
     drivingConfig = SparkBaseConfig()
@@ -188,3 +194,21 @@ class autoConstants:
         config.maxModuleSpeed = DriveConstants.kMaxSpeedMetersPerSecond
         config.driveBaseRadius = 0.45  # meters
         config.maxCentripetalAcceleration = 3.0  # m/s²
+
+class AutoConstants:
+    kUseSqrtControl = True  # improves arrival time and precision for simple driving commands
+
+    # below are really trajectory constants
+    kMaxSpeedMetersPerSecond = 3
+    kMaxAccelerationMetersPerSecondSquared = 3
+    kMaxAngularSpeedRadiansPerSecond = math.pi
+    kMaxAngularSpeedRadiansPerSecondSquared = math.pi
+
+    kPXController = 1
+    kPYController = 1
+    kPThetaController = 1
+
+    # Constraint for the motion profiled robot angle controller
+    kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
+        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared
+    )

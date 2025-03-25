@@ -13,9 +13,10 @@ from wpimath.controller import PIDController, ProfiledPIDControllerRadians, Holo
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.trajectory import TrajectoryConfig, TrajectoryGenerator
 
-from constants import autoConstants, DriveConstants, OIConstants
+from constants import autoConstants, DriveConstants, OIConstants, LiftConstants
 from subsystems.drivesubsystem import DriveSubsystem, BadSimPhysics, AutoBuilder
 from subsystems.limelight_camera import LimelightCamera
+from subsystems.elevator import Elevator
 from buttonbindings import ButtonBindings
 
 from commands.reset_xy import ResetXY, ResetSwerveFront
