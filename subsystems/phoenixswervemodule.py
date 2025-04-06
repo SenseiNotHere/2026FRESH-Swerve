@@ -7,7 +7,6 @@ from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from constants import ModuleConstants
 
-
 class PhoenixSwerveModule:
     def __init__(
             self,
@@ -17,44 +16,44 @@ class PhoenixSwerveModule:
             turnMotorInverted: bool = True,
     ) -> None:
         """
-        drivingCANId: CAN ID for the driving motor
-        turningCANId: CAN ID for the turning motor
-        chassisAngularOffset: Offset angle for this module
-        turnMotorInverted: Whether the turning motor is inverted
+        :param drivingCANId: The CAN ID for the driving motor.
+        :param turningCANId: The CAN ID for the turning motor.
+        :param chassisAngularOffset: Offset angle for this module.
+        :param turnMotorInverted: Whether the turning motor is inverted or not.
         """
+
         self.chassisAngularOffset = chassisAngularOffset
         self.desiredState = SwerveModuleState(0.0, Rotation2d())
 
-        # Create the motor controllers
+        #Initialize the TalonFX Controllers
         self.drivingMotor = TalonFX(drivingCANId)
         self.turningMotor = TalonFX(turningCANId)
 
-        # Configure driving motor
-        driving_config = TalonFXConfiguration()
-        driving_config.motor_output.neutral_mode = NeutralModeValue.BRAKE
+        #Initialize Driving Motors
+        drivingConfig = TalonFXConfiguration()
+        drivingConfig.motor_output.neutral_mode = NeutralModeValue.BRAKE
         # Set appropriate PID values for velocity control
-        driving_config.slot0.k_p = 0.1
-        driving_config.slot0.k_i = 0.0
-        driving_config.slot0.k_d = 0.0
-        driving_config.slot0.k_v = 0.12
-        self.drivingMotor.configurator.apply(driving_config)
+        drivingConfig.slot0.kP = 0.1
+        drivingConfig.slot0.kI = 0.0
+        drivingConfig.slot0.kD = 0.0
+        self.drivingMotor.configurator.apply(drivingConfig)
 
-        # Configure turning motor
-        turning_config = TalonFXConfiguration()
-        turning_config.motor_output.neutral_mode = NeutralModeValue.BRAKE
-        # Set appropriate PID values for position control
-        turning_config.slot0.k_p = 50.0
-        turning_config.slot0.k_i = 0.0
-        turning_config.slot0.k_d = 0.1
-        # Use InvertedValue enum instead of bool
-        turning_config.motor_output.inverted = InvertedValue.CLOCKWISE_POSITIVE if turnMotorInverted else InvertedValue.COUNTER_CLOCKWISE_POSITIVE
-        self.turningMotor.configurator.apply(turning_config)
+        #Initialize Turning Motors
+        turningConfig = TalonFXConfiguration()
+        turningConfig.motor_output.neutral_mode = NeutralModeValue.BRAKE
+        #Set appropriate PID values for position control
+        turningConfig.slot0.kP = 50.0
+        turningConfig.slot0.kI = 0.0
+        turningConfig.slot0.kD = 0.1
+        #Use InvertedValue enum instead of bool
+        turningConfig.motor_output.inverted = InvertedValue.CLOCKWISE_POSITIVE if turnMotorInverted else InvertedValue.COUNTER_CLOCKWISE_POSITIVE
+        self.turningMotor.configurator.apply(turningConfig)
 
-        # Set up velocity and position requests for the motors
+        #Set up velocity and position requests for the motors
         self.velocity_request = VelocityVoltage(0).with_slot(0)
         self.position_request = PositionVoltage(0).with_slot(0)
 
-        # Reset encoders to starting position
+        #Reset encoders to starting position
         self.resetEncoders()
 
     def getState(self) -> SwerveModuleState:
@@ -114,14 +113,14 @@ class PhoenixSwerveModule:
         # Convert optimized angle to rotations
         angle_in_rotations = optimized_angle.radians() / (2 * math.pi)
 
-        # Send commands to motors
+        #Send commands to motors
         self.drivingMotor.set_control(self.velocity_request.with_velocity(optimized_speed))
         self.turningMotor.set_control(self.position_request.with_position(angle_in_rotations))
 
         self.desiredState = desiredState
 
     def stop(self):
-        """Stops the module in place to conserve energy."""
+        """Stops the module."""
         self.drivingMotor.set_control(self.velocity_request.with_velocity(0))
         current_position = self.turningMotor.get_position().value
         self.turningMotor.set_control(self.position_request.with_position(current_position))
