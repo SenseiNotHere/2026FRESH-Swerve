@@ -5,6 +5,7 @@ from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.trajectory import TrapezoidProfileRadians
 
+from rev import SparkBaseConfig, ClosedLoopConfig
 from phoenix6.hardware import talon_fx
 from phoenix6.signals import NeutralModeValue
 
@@ -67,11 +68,11 @@ class ModuleConstants:
 
     kDrivingMotorPinionTeeth = 14
 
-    # Calculations required for driving motor conversion factors and feed forward
+    #Calculations required for driving motor conversion factors and feed forward
     kDrivingMotorFreeSpeedRps = KrakenX60.kFreeSpeedRpm / 60
     kWheelDiameterMeters = 0.0762
     kWheelCircumferenceMeters = kWheelDiameterMeters * math.pi
-    # 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15 teeth on the bevel pinion
+    #45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15 teeth on the bevel pinion
     kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15)
     kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction
 
@@ -105,27 +106,87 @@ class ModuleConstants:
     kTurningMotorCurrentLimit = 20  # amp
 
     kDrivingMinSpeedMetersPerSecond = 0.01
+def getSwerveDrivingMotorConfig() -> SparkBaseConfig:
+    drivingConfig = SparkBaseConfig()
+    drivingConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+    drivingConfig.smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit)
+    drivingConfig.encoder.positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
+    drivingConfig.encoder.velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor)
+    drivingConfig.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+    drivingConfig.closedLoop.pid(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD)
+    drivingConfig.closedLoop.velocityFF(ModuleConstants.kDrivingFF)
+    drivingConfig.closedLoop.outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput)
+    return drivingConfig
 
+
+def getSwerveTurningMotorConfig(turnMotorInverted: bool) -> SparkBaseConfig:
+    turningConfig = SparkBaseConfig()
+    turningConfig.inverted(turnMotorInverted)
+    turningConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+    turningConfig.smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit)
+    turningConfig.absoluteEncoder.positionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor)
+    turningConfig.absoluteEncoder.velocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor)
+    turningConfig.absoluteEncoder.inverted(ModuleConstants.kTurningEncoderInverted)
+    turningConfig.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder)
+    turningConfig.closedLoop.pid(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD)
+    turningConfig.closedLoop.velocityFF(ModuleConstants.kTurningFF)
+    turningConfig.closedLoop.outputRange(ModuleConstants.kTurningMinOutput, ModuleConstants.kTurningMaxOutput)
+    turningConfig.closedLoop.positionWrappingEnabled(True)
+    turningConfig.closedLoop.positionWrappingInputRange(0, ModuleConstants.kTurningEncoderPositionFactor)
+    return turningConfig
+
+
+def getSwerveDrivingMotorConfig() -> SparkBaseConfig:
+    drivingConfig = SparkBaseConfig()
+    drivingConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+    drivingConfig.smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit)
+    drivingConfig.encoder.positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
+    drivingConfig.encoder.velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor)
+    drivingConfig.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+    drivingConfig.closedLoop.pid(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD)
+    drivingConfig.closedLoop.velocityFF(ModuleConstants.kDrivingFF)
+    drivingConfig.closedLoop.outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput)
+    return drivingConfig
+
+
+def getSwerveTurningMotorConfig(turnMotorInverted: bool) -> SparkBaseConfig:
+    turningConfig = SparkBaseConfig()
+    turningConfig.inverted(turnMotorInverted)
+    turningConfig.setIdleMode(SparkBaseConfig.IdleMode.kBrake)
+    turningConfig.smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit)
+    turningConfig.absoluteEncoder.positionConversionFactor(ModuleConstants.kTurningEncoderPositionFactor)
+    turningConfig.absoluteEncoder.velocityConversionFactor(ModuleConstants.kTurningEncoderVelocityFactor)
+    turningConfig.absoluteEncoder.inverted(ModuleConstants.kTurningEncoderInverted)
+    turningConfig.closedLoop.setFeedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder)
+    turningConfig.closedLoop.pid(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD)
+    turningConfig.closedLoop.velocityFF(ModuleConstants.kTurningFF)
+    turningConfig.closedLoop.outputRange(ModuleConstants.kTurningMinOutput, ModuleConstants.kTurningMaxOutput)
+    turningConfig.closedLoop.positionWrappingEnabled(True)
+    turningConfig.closedLoop.positionWrappingInputRange(0, ModuleConstants.kTurningEncoderPositionFactor)
+    return turningConfig
 class OIConstants:
     kDriverControllerPort = 0
     kDriveDeadband = 0.05
 
 class AutoConstants:
-    moduleConfig = ModuleConfig(
-        maxDriveVelocityMPS=DrivingConstants.kMaxMetersPerSecond,
-        driveMotor=DCMotor.krakenX60(),
-        driveCurrentLimit=ModuleConstants.kDrivingMotorCurrentLimit,
-        numMotors=4,
-        wheelRadiusMeters=ModuleConstants.kWheelDiameterMeters / 2,
-        wheelCOF=1.0
-    )
+    #PathPlanner Lib
+#    moduleConfig = ModuleConfig(
+#        maxDriveVelocityMPS=DrivingConstants.kMaxMetersPerSecond,
+#        driveMotor=DCMotor.krakenX60(),
+#        driveCurrentLimit=ModuleConstants.kDrivingMotorCurrentLimit,
+#        numMotors=2,
+#        wheelRadiusMeters=ModuleConstants.kWheelDiameterMeters / 2,
+#        wheelCOF=1.0
+#    )
 
-    config = RobotConfig(
-        massKG=60.00,
-        MOI=8.0,
-        moduleConfig=moduleConfig,
-        moduleOffsets=DrivingConstants.kModulePositions
-    )
+#    config = RobotConfig(
+#        massKG=60.00,
+#        MOI=8.0,
+#        moduleConfig=moduleConfig,
+#        moduleOffsets=DrivingConstants.kModulePositions
+#    )
+
+    config = RobotConfig.fromGUISettings()
 
     #Additional settings
     config.maxModuleSpeed = DrivingConstants.kMaxMetersPerSecond
@@ -134,7 +195,7 @@ class AutoConstants:
 
     kUseSqrtControl = True  # improves arrival time and precision for simple driving commands
 
-    # below are really trajectory constants
+    #Trajectory settings
     kMaxMetersPerSecond = 3
     kMaxAccelerationMetersPerSecondSquared = 3
     kMaxAngularSpeedRadiansPerSecond = math.pi

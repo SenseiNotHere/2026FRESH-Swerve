@@ -12,10 +12,13 @@ from wpilib import XboxController, PS4Controller, SmartDashboard
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians, HolonomicDriveController
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.trajectory import TrajectoryConfig, TrajectoryGenerator
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 
-from subsystems.drivesubystem import DriveSubsystem, AutoBuilder, BadSimPhysics
+from commands.reset_xy import ResetXY
+from subsystems.drivesubystem import DriveSubsystem, BadSimPhysics
 from commands.holonomicdrive import HolonomicDrive
 from buttonbindings import ButtonBindings
+from tests.configureTests import ConfigureTests
 from constants import OIConstants
 
 class RobotContainer:
@@ -30,20 +33,26 @@ class RobotContainer:
         if commands2.TimedCommandRobot.isSimulation():
             self.robotDrive.simPhysics = BadSimPhysics(self.robotDrive, robot)
         self.autoChooser = AutoBuilder.buildAutoChooser()
-        SmartDashboard.putData("Auto Chooser", self.autoChooser)
+        self.testChooser = wpilib.SendableChooser()
+
+        SmartDashboard.putData("Auto Routines", self.autoChooser)
+        SmartDashboard.putData("Test Routines", self.testChooser)
+
+        #Named commands for PathPlanner
 
         #Setting up controllers
         self.driverController = CommandGenericHID(OIConstants.kDriverControllerPort)
 
         self.buttonBindings = ButtonBindings(self)
         self.buttonBindings.configureButtonBindings()
+        self.configureTests = ConfigureTests(self)
 
         self.robotDrive.setDefaultCommand(
             HolonomicDrive(
                 self.robotDrive,
-                forwardSpeed=lambda: self.driverController.getRawAxis(PS4Controller.Axis.kLeftY),
-                leftSpeed=lambda: self.driverController.getRawAxis(PS4Controller.Axis.kLeftX),
-                rotationSpeed=lambda: -self.driverController.getRawAxis(PS4Controller.Axis.kRightX),
+                forwardSpeed=lambda: self.driverController.getRawAxis(XboxController.Axis.kLeftY),
+                leftSpeed=lambda: self.driverController.getRawAxis(XboxController.Axis.kLeftX),
+                rotationSpeed=lambda: -self.driverController.getRawAxis(XboxController.Axis.kRightX),
                 deadband=OIConstants.kDriveDeadband,
                 fieldRelative=True,
                 rateLimit=True,
@@ -71,3 +80,4 @@ class RobotContainer:
         """
         :returns: the command that will be running when test mode is enabled
         """
+        return self.testChooser.getSelected()

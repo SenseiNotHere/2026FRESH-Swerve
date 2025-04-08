@@ -15,9 +15,13 @@ from wpimath.kinematics import (
     SwerveDrive4Odometry,
 )
 from wpilib import SmartDashboard, Field2d, DriverStation
+from rev import SparkMax, SparkFlex, SparkLowLevel, SparkAbsoluteEncoder, SparkBase
+from phoenix6.hardware import TalonFX
 
 import swerveutils
 from .phoenixswervemodule import PhoenixSwerveModule
+from .maxswervemodule import MAXSwerveModule
+from .hybridswervemodule import HybridSwerveModule
 import navx
 
 from pathplannerlib.auto import AutoBuilder
@@ -41,31 +45,39 @@ class DriveSubsystem(Subsystem):
 
         enabledChassisAngularOffset = 0 if DrivingConstants.kAssumeZeroOffsets else 1
 
-        self.frontLeft = PhoenixSwerveModule(
-            DrivingConstants.kFrontLeftDriving,
-            DrivingConstants.kFrontLeftTurning,
-            DrivingConstants.kFrontLeftChassisAngularOffset * enabledChassisAngularOffset,
+        self.frontLeft = HybridSwerveModule(
+            drivingCANId=DrivingConstants.kFrontLeftDriving,
+            drivingControllerType=TalonFX,
+            turningCANId=DrivingConstants.kFrontLeftTurning,
+            turningControllerType=SparkMax,
+            chassisAngularOffset=DrivingConstants.kFrontLeftChassisAngularOffset * enabledChassisAngularOffset,
             turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.frontRight = PhoenixSwerveModule(
-            DrivingConstants.kFrontRightDriving,
-            DrivingConstants.kFrontRightTurning,
-            DrivingConstants.kFrontRightChassisAngularOffset * enabledChassisAngularOffset,
+        self.frontRight = HybridSwerveModule(
+            drivingCANId=DrivingConstants.kFrontRightDriving,
+            drivingControllerType=TalonFX,
+            turningCANId=DrivingConstants.kFrontRightTurning,
+            turningControllerType=SparkMax,
+            chassisAngularOffset=DrivingConstants.kFrontRightChassisAngularOffset * enabledChassisAngularOffset,
             turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.rearLeft = PhoenixSwerveModule(
-            DrivingConstants.kBackLeftDriving,
-            DrivingConstants.kBackLeftTurning,
-            DrivingConstants.kBackLeftChassisAngularOffset * enabledChassisAngularOffset,
+        self.rearLeft = HybridSwerveModule(
+            drivingCANId=DrivingConstants.kBackLeftDriving,
+            drivingControllerType=TalonFX,
+            turningCANId=DrivingConstants.kBackLeftTurning,
+            turningControllerType=SparkMax,
+            chassisAngularOffset=DrivingConstants.kBackLeftChassisAngularOffset * enabledChassisAngularOffset,
             turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
-        self.rearRight = PhoenixSwerveModule(
-            DrivingConstants.kBackRightDriving,
-            DrivingConstants.kBackRightTurning,
-            DrivingConstants.kBackRightChassisAngularOffset * enabledChassisAngularOffset,
+        self.rearRight = HybridSwerveModule(
+            drivingCANId=DrivingConstants.kBackRightDriving,
+            drivingControllerType=TalonFX,
+            turningCANId=DrivingConstants.kBackRightTurning,
+            turningControllerType=SparkMax,
+            chassisAngularOffset=DrivingConstants.kBackRightChassisAngularOffset * enabledChassisAngularOffset,
             turnMotorInverted=ModuleConstants.kTurningMotorInverted
         )
 
@@ -109,7 +121,7 @@ class DriveSubsystem(Subsystem):
             lambda speeds, feedforwards: self.drive(speeds.vx, speeds.vy, speeds.omega, True, True),
             # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
             PPHolonomicDriveController(
-                # PPHolonomicController is the built in path following controller for holonomic drive trains
+                # PPHolonomicController is the built-in path following controller for holonomic drive trains
                 PIDConstants(5.0, 0.0, 0.0),  # Translation PID constants
                 PIDConstants(5.0, 0.0, 0.0)  # Rotation PID constants
             ),
@@ -117,15 +129,16 @@ class DriveSubsystem(Subsystem):
             self.shouldFlipPath,  # Supplier to control path flipping based on alliance color
             self  # Reference to this subsystem to set requirements
         )
+        AutoBuilder.isHolonomic()
 
     def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
         """Returns the current robot-relative ChassisSpeeds"""
         return DrivingConstants.kDriveKinematics.toChassisSpeeds(
             (
-                self.frontLeft.getState(),
-                self.frontRight.getState(),
-                self.rearLeft.getState(),
-                self.rearRight.getState(),
+                self.frontLeft.getState(self.frontLeft.drivingControllerType, self.frontLeft.turningControllerType),
+                self.frontRight.getState(self.frontRight.drivingControllerType, self.frontRight.turningControllerType),
+                self.rearLeft.getState(self.rearLeft.drivingControllerType, self.rearLeft.turningControllerType),
+                self.rearRight.getState(self.rearRight.drivingControllerType, self.rearRight.turningControllerType),
             )
         )
 
@@ -248,9 +261,6 @@ class DriveSubsystem(Subsystem):
             norm = math.sqrt(xSpeed * xSpeed + ySpeed * ySpeed)
             xSpeed = xSpeed * norm
             ySpeed = ySpeed * norm
-
-        if (abs(xSpeed) > 0.1 or abs(ySpeed) > 0.1):
-            print("")
 
         if (xSpeed != 0 or ySpeed != 0) and self.maxSpeedScaleFactor is not None:
             norm = math.sqrt(xSpeed * xSpeed + ySpeed * ySpeed)

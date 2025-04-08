@@ -6,44 +6,44 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "715",
+      "height": "736",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "1366",
-      "xpos": "-1",
-      "ypos": "-1"
+      "width": "681",
+      "xpos": "684",
+      "ypos": "31"
     }
   },
   "Window": {
     "###FMS": {
       "Collapsed": "0",
-      "Pos": "5,579",
-      "Size": "283,140"
+      "Pos": "14,311",
+      "Size": "169,184"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "273,383",
-      "Size": "796,240"
+      "Pos": "304,348",
+      "Size": "675,73"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "290,200",
+      "Pos": "304,162",
       "Size": "750,185"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "289,56",
+      "Pos": "304,17",
       "Size": "750,145"
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "1104,24",
+      "Pos": "662,19",
       "Size": "250,695"
     },
     "###System Joysticks": {
       "Collapsed": "0",
-      "Pos": "5,350",
+      "Pos": "9,494",
       "Size": "192,218"
     },
     "###Timing": {

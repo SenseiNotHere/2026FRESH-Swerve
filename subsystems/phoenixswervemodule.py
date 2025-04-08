@@ -32,7 +32,7 @@ class PhoenixSwerveModule:
         #Initialize Driving Motors
         drivingConfig = TalonFXConfiguration()
         drivingConfig.motor_output.neutral_mode = NeutralModeValue.BRAKE
-        # Set appropriate PID values for velocity control
+        #Set appropriate PID values for velocity control
         drivingConfig.slot0.kP = 0.1
         drivingConfig.slot0.kI = 0.0
         drivingConfig.slot0.kD = 0.0
@@ -102,7 +102,7 @@ class PhoenixSwerveModule:
         while angle_diff < -math.pi:
             angle_diff += 2 * math.pi
 
-        # If the difference is greater than 90 degrees (π/2), flip the direction
+        #If the difference is greater than 90 degrees (π/2), flip the direction
         if abs(angle_diff) > math.pi / 2:
             optimized_speed = -correctedDesiredState.speed
             optimized_angle = Rotation2d(correctedDesiredState.angle.radians() + math.pi)

@@ -2,7 +2,7 @@ from wpilib import XboxController, PS4Controller
 from commands2 import cmd, InstantCommand, RunCommand
 from commands2.button import CommandGenericHID
 
-from commands.reset_XY import ResetXY, ResetSwerveFront
+from commands.reset_xy import ResetXY, ResetSwerveFront
 
 
 class ButtonBindings:
